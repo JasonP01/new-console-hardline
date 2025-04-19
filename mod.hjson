@@ -7,21 +7,21 @@ name: "newconsole-hardline"
 author: "Mnemotechnician (original developer), SMOLKEYS (port maintainer)"
 
 description: '''
-Adds a console UI superior to the built-in one and the ones provided by any other mods.
-User-friendly interface, an actual code editor with [accent]syntax highlighting[] and indentation guides, assistance and more,
-a good log panel, execution history - all that is included in this mod.
+The officially acknowledged port of New Console for v147-above.
 
-In addiction to the console, this mod offers:
-- An ability to save as many scripts as you want, execute them or copy to the console
+Adds a console UI superior to the built-in one and the ones provided by any other mods.
+User-friendly interface, an actual code editor with [accent]syntax highlighting[] and indentation guides, assistance and more:
+A good log panel, execution history - all of that is included in this mod.
+
+In addition to the console, this mod offers:
+- An ability to save as many scripts as you want and to either execute them or copy to the console
 - An ability to execute scripts when certain events get fired
 - A full-blown file browser (be careful, you can cause real harm with that!)
 
 See README.md for more info.
-
-[orange]Technically compatible with v146-below, but Mindustry does not have a mod config for that.[]
 '''
 
-version: 2.0
+version: 2.1
 subtitle: "Adds a superior console UI."
 minGameVersion: 147
 hidden: true

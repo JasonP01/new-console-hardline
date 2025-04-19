@@ -1,102 +1,105 @@
 package newconsole;
 
-import arc.Core;
-import arc.Events;
-import arc.math.geom.Vec2;
-import arc.scene.event.Touchable;
-import arc.scene.ui.layout.WidgetGroup;
+import arc.*;
+import arc.math.geom.*;
+import arc.scene.event.*;
+import arc.scene.ui.layout.*;
 import arc.util.*;
-import com.github.mnemotechnician.autoupdater.Updater;
-import mindustry.Vars;
-import mindustry.game.EventType;
-import mindustry.gen.Icon;
-import mindustry.mod.Mod;
-import mindustry.ui.Styles;
-import newconsole.game.ConsoleSettings;
-import newconsole.io.AutorunManager;
-import newconsole.io.ScriptsManager;
-import newconsole.ui.CStyles;
-import newconsole.ui.FloatingWidget;
+import com.github.mnemotechnician.autoupdater.*;
+import mindustry.*;
+import mindustry.game.*;
+import mindustry.gen.*;
+import mindustry.mod.*;
+import mindustry.ui.*;
+import newconsole.game.*;
+import newconsole.io.*;
+import newconsole.js.*;
+import newconsole.ui.*;
 import newconsole.ui.dialogs.*;
 
 public class NewConsoleMod extends Mod {
 
-	public NewConsoleMod() {
-		Vars.loadLogger();
+    public NewConsoleMod() {
+        Vars.loadLogger();
 
-		Events.on(EventType.ClientLoadEvent.class, event -> {
-			CStyles.loadSync();
-			initConsole();
-		});
+        Events.on(EventType.ClientLoadEvent.class, event -> {
+            NCJSLink.importPackage(
+                    "newconsole", "newconsole.game", "newconsole.io",
+                    "newconsole.js", "newconsole.ui"
+            );
 
-		Events.on(EventType.ClientLoadEvent.class, a -> checkUpdates());
-	}
+            CStyles.loadSync();
+            initConsole();
+        });
 
-	public static void executeStartup() {
-		try {
-			var file = Vars.tree.get(ConsoleVars.startup);
-			if (!file.exists()) {
-				Log.warn("Startup script not found.");
-				return;
-			}
+        Events.on(EventType.ClientLoadEvent.class, a -> checkUpdates());
+    }
 
-			Log.info("Executing startup script...");
-			Time.mark();
-			Vars.mods.getScripts().runConsole(file.readString());
-			Log.info("Startup script executed in [blue]" + Time.elapsed() + "[] ms.");
-		} catch (Throwable e) {
-			Log.err("Failed to execute startup script!", e);
-		}
-	}
+    public static void executeStartup() {
+        try {
+            var file = Vars.tree.get(ConsoleVars.startup);
+            if (!file.exists()) {
+                Log.warn("Startup script not found.");
+                return;
+            }
 
-	public void checkUpdates() {
-		Updater.checkUpdates(this);
-	}
+            Log.info("Executing startup script...");
+            Time.mark();
+            Vars.mods.getScripts().runConsole(file.readString());
+            Log.info("Startup script executed in [blue]" + Time.elapsed() + "[] ms.");
+        } catch (Throwable e) {
+            Log.err("Failed to execute startup script!", e);
+        }
+    }
 
-	public void initConsole() {
-		ConsoleVars.group = new WidgetGroup();
-		ConsoleVars.group.setFillParent(true);
-		ConsoleVars.group.touchable = Touchable.childrenOnly;
-		ConsoleVars.group.visible(() -> ConsoleVars.consoleEnabled);
-		Core.scene.add(ConsoleVars.group);
-		ConsoleVars.console = new Console();
+    public void checkUpdates() {
+        Updater.checkUpdates(this);
+    }
 
-		ConsoleVars.saves = new SavesDialog();
-		ConsoleVars.copypaste = new CopypasteDialog();
-		ConsoleVars.fileBrowser = new FileBrowser();
-		ConsoleVars.autorun = new AutorunDialog();
+    public void initConsole() {
+        ConsoleVars.group = new WidgetGroup();
+        ConsoleVars.group.setFillParent(true);
+        ConsoleVars.group.touchable = Touchable.childrenOnly;
+        ConsoleVars.group.visible(() -> ConsoleVars.consoleEnabled);
+        Core.scene.add(ConsoleVars.group);
+        ConsoleVars.console = new Console();
 
-		ConsoleVars.floatingWidget = new FloatingWidget();
+        ConsoleVars.saves = new SavesDialog();
+        ConsoleVars.copypaste = new CopypasteDialog();
+        ConsoleVars.fileBrowser = new FileBrowser();
+        ConsoleVars.autorun = new AutorunDialog();
 
-		ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, ConsoleVars.console::show)
-			.uniformX().uniformY().fill();
+        ConsoleVars.floatingWidget = new FloatingWidget();
 
-		ConsoleVars.group.addChild(ConsoleVars.floatingWidget);
-		Time.run(10, () -> {
-			// try to restore the position of the button
-			var oldPosition = ConsoleSettings.getLastButtonPosition();
+        ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, ConsoleVars.console::show)
+                .uniformX().uniformY().fill();
 
-			ConsoleVars.floatingWidget.setPosition(
-				oldPosition.x != -1 ? oldPosition.x : ConsoleVars.group.getWidth() / 2f,
-				oldPosition.y != -1 ? oldPosition.y : ConsoleVars.group.getHeight() / 1.5f
-			);
-		});
-		var lastSavedPosition = new Vec2(-1, -1);
-		Timer.schedule(() -> {
-			// Save the position of the floating button, if necessary
-			var newPosition = Tmp.v1.set(
-				ConsoleVars.floatingWidget.x,
-				ConsoleVars.floatingWidget.y
-			);
-			if (newPosition.equals(lastSavedPosition)) return;
+        ConsoleVars.group.addChild(ConsoleVars.floatingWidget);
+        Time.run(10, () -> {
+            // try to restore the position of the button
+            var oldPosition = ConsoleSettings.getLastButtonPosition();
 
-			lastSavedPosition.set(newPosition);
-			ConsoleSettings.setLastButtonPosition(newPosition);
-		}, 2f, 2f);
+            ConsoleVars.floatingWidget.setPosition(
+                    oldPosition.x != -1 ? oldPosition.x : ConsoleVars.group.getWidth() / 2f,
+                    oldPosition.y != -1 ? oldPosition.y : ConsoleVars.group.getHeight() / 1.5f
+            );
+        });
+        var lastSavedPosition = new Vec2(-1, -1);
+        Timer.schedule(() -> {
+            // Save the position of the floating button, if necessary
+            var newPosition = Tmp.v1.set(
+                    ConsoleVars.floatingWidget.x,
+                    ConsoleVars.floatingWidget.y
+            );
+            if (newPosition.equals(lastSavedPosition)) return;
 
-		ScriptsManager.init();
-		AutorunManager.init();
-		ConsoleSettings.init();
-		executeStartup();
-	}
+            lastSavedPosition.set(newPosition);
+            ConsoleSettings.setLastButtonPosition(newPosition);
+        }, 2f, 2f);
+
+        ScriptsManager.init();
+        AutorunManager.init();
+        ConsoleSettings.init();
+        executeStartup();
+    }
 }

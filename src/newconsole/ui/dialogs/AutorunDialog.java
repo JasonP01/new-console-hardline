@@ -1,142 +1,148 @@
 package newconsole.ui.dialogs;
 
-import arc.scene.Action;
-import arc.scene.Scene;
-import arc.scene.ui.Dialog;
-import arc.scene.ui.TextButton;
-import arc.scene.ui.layout.Table;
-import mindustry.Vars;
-import mindustry.game.EventType;
-import mindustry.gen.Icon;
-import mindustry.graphics.Pal;
-import mindustry.ui.Styles;
-import mindustry.ui.dialogs.BaseDialog;
-import newconsole.ConsoleVars;
-import newconsole.io.AutorunManager;
-import newconsole.ui.BetterPane;
-import newconsole.ui.CStyles;
-import newconsole.ui.CodeSpinner;
-import newconsole.ui.Spinner;
+import arc.math.*;
+import arc.scene.*;
+import arc.scene.ui.*;
+import arc.scene.ui.layout.*;
+import mindustry.*;
+import mindustry.game.*;
+import mindustry.gen.*;
+import mindustry.graphics.*;
+import mindustry.ui.*;
+import mindustry.ui.dialogs.*;
+import newconsole.*;
+import newconsole.io.*;
+import newconsole.ui.*;
 
 /**
  * Allows the user to run specific scripts upon specific game events.
+ * @author Mnemotechnician
  */
 public class AutorunDialog extends BaseDialog {
 
-	public Class lastEvent = EventType.ClientLoadEvent.class;
+    public Class<?> lastEvent = EventType.ClientLoadEvent.class;
 
-	public Table list;
-	public Spinner eventsSpinner;
+    public Table list;
+    //public Spinner eventsSpinner;
 
-	public AutorunDialog() {
-		super("@newconsole.autorun-header");
-		closeOnBack();
+    public AutorunDialog() {
+        super("@newconsole.autorun-header");
+        closeOnBack();
 
-		cont.table(bar -> {
-			bar.left();
+        cont.table(bar -> {
+            bar.left();
 
-			bar.button(Icon.exit, Styles.defaulti, this::hide).size(50f);
-		}).growX().row();
+            bar.button(Icon.exit, Styles.defaulti, this::hide).size(50f);
+        }).growX().row();
 
-		cont.stack(
-			new Table(listRoot -> {
-				listRoot.top().left().setFillParent(true);
+        cont.stack(
+                new Table(listRoot -> {
+                    listRoot.top().left().setFillParent(true);
 
-				listRoot.add(new BetterPane(list -> {
-					list.setBackground(CStyles.scriptbg);
+                    listRoot.add(new BetterPane(list -> {
+                        list.setBackground(CStyles.scriptbg);
 
-					this.list = list;
-				})).grow();
-			}),
+                        this.list = list;
+                    })).grow();
+                }),
 
-			new Table(addAutorun -> {
-				addAutorun.top().left().setFillParent(true);
+                new Table(addAutorun -> {
+                    addAutorun.top().left().setFillParent(true);
 
-				addAutorun.add(new Spinner("@newconsole.add-event", false, panel -> {
-					panel.setBackground(CStyles.scriptbg);
+                    addAutorun.add(new Spinner("@newconsole.add-event", false, panel -> {
+                        panel.setBackground(CStyles.scriptbg);
 
-					panel.label(() -> lastEvent.getSimpleName()).growX().get().setColor(Pal.accent);
-					panel.row();
+                        panel.label(() -> lastEvent.getSimpleName()).growX().get().setColor(Pal.accent);
+                        panel.row();
+
+					/*
+					TODO broken, what the fuck happened???
 
 					eventsSpinner = new Spinner("@newconsole.select-event", false, events -> {
-						for (final var event : AutorunManager.allEvents) {
-							var button = events.button(event.getSimpleName(), Styles.defaultt, () -> {
-								lastEvent = event;
+						AutorunManager.allEvents.each(event -> {
+                            events.button(event.getSimpleName(), Styles.defaultt, () -> {
+                                lastEvent = event;
 
-								eventsSpinner.hide(false);
-							}).growX().get();
-
-							events.row();
-						}
+                                eventsSpinner.hide(false);
+                            }).growX().row();
+						});
 					});
-					panel.add(eventsSpinner).growX().marginBottom(10f).row();
+					*/
 
-					panel.button("@newconsole.save", Styles.defaultt, () -> {
-						String code = ConsoleVars.console.area.getText();
+                        BetterPane pane = new BetterPane(events -> {
+                            AutorunManager.allEvents.each(event -> {
+                                events.button(event.getSimpleName(), Styles.defaultt, () -> {
+                                    lastEvent = event;
+                                }).growX().row();
+                            });
+                        });
 
-						if (!code.isEmpty()) {
-							AutorunManager.add(lastEvent, code);
-							AutorunManager.save();
-							rebuild();
-						} else {
-							Vars.ui.showInfo("@newconsole.empty-script");
-						}
-					}).growX();
-				})).margin(4f).width(350f).with(it -> {
-					it.setStyle(Styles.defaultt);
-					it.unique = false;
-				}).row();
-			})
-		).grow();
-	}
+                        panel.add(pane).grow().marginBottom(10f).row();
 
-	@Override
-	public Dialog show(Scene stage, Action action) {
-		rebuild();
-		return super.show(stage, action);
-	}
+                        panel.button("@newconsole.save", Styles.defaultt, () -> {
+                            String code = ConsoleVars.console.area.getText();
 
-	public void rebuild() {
-		list.clearChildren();
-		for (var entry : AutorunManager.events) addEntry(entry);
-	}
+                            if (!code.isEmpty()) {
+                                AutorunManager.add(lastEvent, code);
+                                AutorunManager.save();
+                                rebuild();
+                            } else {
+                                Vars.ui.showInfo("@newconsole.empty-script");
+                            }
+                        }).growX();
+                    })).margin(4f).width(350f).with(it -> {
+                        it.setStyle(Styles.defaultt);
+                        it.unique = false;
+                    }).row();
+                })
+        ).grow();
+    }
 
-	public void addEntry(AutorunManager.AutorunEntry entry) {
-		list.table(table -> {
-			table.center().left().setBackground(CStyles.scriptbg);
+    @Override
+    public Dialog show(Scene stage, Action action) {
+        rebuild();
+        return super.show(stage, action);
+    }
 
-			table.add("[accent]#" + list.getChildren().size).width(40f).padRight(10f);
+    public void rebuild() {
+        list.clearChildren();
+        for (var entry : AutorunManager.events) addEntry(entry);
+    }
 
-			table.labelWrap("[darkgrey]" + entry.event.getSimpleName() + "->").width(200f);
+    public void addEntry(AutorunManager.AutorunEntry<?> entry) {
+        list.table(table -> {
+            table.center().left().setBackground(CStyles.scriptbg);
 
-			table.add(new CodeSpinner(entry.script)).growX();
+            table.add("[accent]#" + list.getChildren().size).width(40f).padRight(10f);
 
-			table.table(actions -> {
-				actions.defaults().size(50f);
+            table.labelWrap("[gray]" + entry.event.getSimpleName() + " >").width(220f);
 
-				TextButton toggle = new TextButton(entry.enabled ? "@newconsole.enabled" : "@newconsole.disabled", Styles.defaultt);
-				actions.add(toggle).width(80f);
-				//fuck java lambdas
-				toggle.clicked(() -> {
-					entry.enabled = !entry.enabled;
+            table.add(new CodeSpinner(entry.script)).growX();
 
-					toggle.setText(entry.enabled ? "@newconsole.enabled" : "@newconsole.disabled");
-				});
+            table.table(actions -> {
+                actions.defaults().size(50f);
 
-				actions.button(CStyles.editIcon, Styles.defaulti, () -> {
-					ConsoleVars.console.setCode(entry.script);
-					hide();
-				});
+                TextButton toggle = new TextButton(entry.enabled ? "@newconsole.enabled" : "@newconsole.disabled", Styles.defaultt);
+                actions.add(toggle).width(80f);
+                //fuck java lambdas
+                toggle.clicked(() -> {
+                    entry.enabled = !entry.enabled;
 
-				actions.button(CStyles.deleteIcon, Styles.defaulti, () -> {
-					Vars.ui.showConfirm("@newconsole.delete-confirm", () -> {
-						AutorunManager.remove(entry);
-						AutorunManager.save();
-						rebuild();
-					});
-				});
-			}).padLeft(20f);
-		}).growX().pad(4f).marginBottom(5f).row();
-	}
+                    toggle.setText(entry.enabled ? "@newconsole.enabled" : "@newconsole.disabled");
+                });
+
+                actions.button(CStyles.editIcon, Styles.defaulti, () -> {
+                    ConsoleVars.console.setCode(entry.script);
+                    hide();
+                });
+
+                actions.button(CStyles.deleteIcon, Styles.defaulti, () -> Vars.ui.showConfirm("@newconsole.delete-confirm", () -> {
+                    AutorunManager.remove(entry);
+                    AutorunManager.save();
+                    rebuild();
+                }));
+            }).padLeft(20f);
+        }).growX().pad(4f).marginBottom(5f).row();
+    }
 
 }

@@ -49,13 +49,14 @@ Why prefer NewConsole over other console mods or the built-in one? Well, there a
     * You can execute a saved script by pressing the green triangle button, copy it to the console using the yellow clipboard button, or delete it using the red trash bin button.
 
 * A file browser. Pretty much self-explanatory, you can browse directories, open files (text ones can be copied to the console, images can be viewed, zip files can be browsed like normal directories).
-    * On android 10+, its functionality is limited due to the limitations of the OS.
+    * On Android 10+, its functionality is limited due to the limitations of the OS.
 
 * A menu allowing you to execute a script when an event occurs.
-    * Pretty similar to the scripts menu.
+    * Pretty similar to the script menu.
     * In the left top corner you there's a menu. You need to input the script in the console and select an event upon which it will run.
+    * You can refer to an autorun event object with `_autorun_event`.
     * You can delete a saved autorun script by pressing the red trash bin button.
-    * Due to how dangerous this is, all saves autorun scripts are disabled when you restart the game to avoid a possible softlock. You need to manually re-enable them after that.
+    * Due to how dangerous this is, all saved autorun scripts are disabled when you restart the game to avoid a possible softlock. You need to manually re-enable them after that.
 
 
 ### Console history
@@ -68,11 +69,15 @@ Using the "prev" and "next" buttons, you can view older and newer entries of the
 If you press "next" while already being at the newest history entry, your current input is cleared. 
 You can always press "prev" to return to whatever you've been writing.
 
-# Rewrite ahead
-NewConsole 1.8 will be the last version of NewConsole written in java.
+# ~~Rewrite ahead~~
+<strike>NewConsole 1.8 will be the last version of NewConsole written in java.
 Later it will be rewritten from scratch using kotlin and mkui. Everything will be changed.
 I already have a plan about that, but I'm not sure when I will be able to begin.
 Not telling any dates yet, it will probably happen somewhere in 2023 or 2024.
 
 NeoConsole, or NewConsole 2.0, will include both the old and the new version of the mod,
-allowing you to choose what you want to use, so it will not be a rough change.
+allowing you to choose what you want to use, so it will not be a rough change.</strike>
+
+With Mnemotechnician leaving the modding scene, this message is no longer relevant.
+
+NC-1.9 was also still Java, so, uh, funny.
