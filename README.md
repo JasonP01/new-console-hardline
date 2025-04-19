@@ -1,15 +1,24 @@
-## New Console
-A Mindustry mod adding a new console ui,
-which is superior to that provided by the vanilla game
-or any other mod.
+## New Console Hardline
+A Mindustry mod adding a new console UI, which is superior to that provided by the vanilla game or any other mod.
+
+This repository is an active fork of the old repository, as the original developer (Mnemotechnician) has effectively left the Mindustry modding scene.
+
+## V8
+Starting from NCH-2.0, NewConsole requires Mindustry v147-above to run.
+If you still intend on using older versions of Mindustry, visit the [original repository](https://github.com/Mnemotechnician/new-console) for the older releases.
+
+- NCH-2.0 and future versions - v147-above
+  * You *could* technically use NCH-2.0 on v146-below as no code changes were made at all, but Mindustry does not have a special toggle for Java mods that indicates cross-compatibility between v146 and v147.
+- NC-1.4.1 up to NC-1.9 - v136-146
+- NC-1.4 below - v135.2-below
 
 ## V7
-Starting from NC-1.4.1, NewConsole requires mindustry v136 or never to run.
+Starting from NC-1.4.1, NewConsole requires Mindustry v136-above to run.
 If you're still on v135.2, you can visit the "releases" page and download a v1.4 or an older version.
 However, these versions lack many useful features, contain many bugs and just look unpleasant.
 
-This mod __does not__ support v6. v126 is outdated by several years,
-get real!
+## V6
+This mod __does not__ support v6. v126 is outdated by several years, get real!
 
 # Why NewConsole?
 Why prefer NewConsole over other console mods or the built-in one? Well, there are several reasons:

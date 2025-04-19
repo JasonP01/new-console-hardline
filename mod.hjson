@@ -1,16 +1,13 @@
-# this is not to be changed until v7 gets released.
-#!VERSION 1.9
-#!REPO "Mnemotechnician/New-console"
+#!VERSION 2.0
+#!REPO "SMOLKEYS/new-console-hardline"
 #!BRANCH "master"
 
-#Reminder for myself: THINK TWICE BEFORE MODIFYING THE VALUES ABOVE
-
-displayName: "New Console"
-name: "newconsole"
-author: "Mnemotechnician"
+displayName: "New Console Hardline"
+name: "newconsole-hardline"
+author: "Mnemotechnician (original developer), SMOLKEYS (port maintainer)"
 
 description: '''
-Adds a console ui superior to the built-in one and the ones provided by any other mods.
+Adds a console UI superior to the built-in one and the ones provided by any other mods.
 User-friendly interface, an actual code editor with [accent]syntax highlighting[] and indentation guides, assistance and more,
 a good log panel, execution history - all that is included in this mod.
 
@@ -20,11 +17,13 @@ In addiction to the console, this mod offers:
 - A full-blown file browser (be careful, you can cause real harm with that!)
 
 See README.md for more info.
-'''
-version: 1.9
-subtitle: "Adds a superior console UI."
-minGameVersion: 136
-hidden: true
 
+[orange]Technically compatible with v146-below, but Mindustry does not have a mod config for that.[]
+'''
+
+version: 2.0
+subtitle: "Adds a superior console UI."
+minGameVersion: 147
+hidden: true
 java: true
 main: "newconsole.NewConsoleMod"
