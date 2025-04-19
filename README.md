@@ -1,7 +1,9 @@
 ## New Console Hardline
 A Mindustry mod adding a new console UI, which is superior to that provided by the vanilla game or any other mod.
 
-This repository is an active fork of the old repository, as the original developer (Mnemotechnician) has effectively left the Mindustry modding scene.
+This repository is an active fork of the old repository, as the original developer (Mnemotechnician) has effectively left the Mindustry modding scene. It is detached from the root repository so that the mod scraper can list this fork in the mod browser.
+
+[Original Repository](https://github.com/Mnemotechnician/new-console)
 
 ## V8
 Starting from NCH-2.0, NewConsole requires Mindustry v147-above to run.
