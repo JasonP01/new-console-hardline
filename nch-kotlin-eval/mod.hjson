@@ -1,0 +1,14 @@
+displayName: "New Console Hardline: Kotlinscript Evaluator"
+name: "newconsole-hardline-kts-eval-extension"
+author: "SMOLKEYS"
+
+description: '''
+A special extension for NewConsole that adds in a console for evaluating Kotlinscript code.
+'''
+
+version: 0.1
+minGameVersion: 147
+hidden: true
+java: true
+main: "newconsole.NewConsoleKts"
+dependencies: ["newconsole-hardline"]

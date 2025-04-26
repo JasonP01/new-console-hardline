@@ -16,49 +16,32 @@ import newconsole.game.*;
 @SuppressWarnings("unused")
 public class AutorunManager {
 
-    public static final String save = "newconsole.autorun";
+    //public static final String save = "newconsole.autorun";
     public static final byte startScript = 3, endScript = 4, splitter = 17, eof = 127;
 
-    public static Fi root;
-    /**
-     * All default event classes
-     */
+    public static Fi root = Vars.dataDirectory.child("saves");
+
     public static final Seq<Class<?>> allEvents = new Seq<>();
-    /**
-     * All current events
-     */
-    public static final Seq<AutorunEntry<?>> events = new Seq<>();
+
+    public final String name, nameSave;
+    public final Seq<AutorunEntry<?>> events = new Seq<>();
+
+    //???
+    public Func3<String, String, Object, String> runner;
+
+    public AutorunManager(String name){
+        this.name = name;
+        this.nameSave = Strings.format("newconsole-autorun-@.save", name);
+    }
 
     static {
         findEvents();
     }
 
-    public static void init() {
-        root = Vars.dataDirectory.child("saves");
-        root.mkdirs();
-
-        if (!root.exists() || !root.isDirectory()) {
-            Log.err("Autorun manager failed to init");
-            return;
-        }
-
-        if (loadSave(root.child(save))) {
-            //normal save loaded
-            Log.info("Loaded autorun save");
-        } else if (loadSave(root.child(save + ".backup"))) {
-            //normal save corrupt, backup is not
-            root.child(save + ".backup").moveTo(root.child(save));
-            save();
-            Log.warn("Couldn't load autorun save, loaded backup");
-        } else {
-            Log.warn("Couldn't load autorun save");
-        }
-    }
-
     /**
      * Loads events from the provided file. Returns whether the load was successful.
      */
-    public static boolean loadSave(Fi file) {
+    public boolean loadSave(Fi file) {
         if (file == null || !file.exists()) return false;
         if (root == null) throw new IllegalStateException("AutorunManager hasn't been initialized yet");
 
@@ -117,12 +100,12 @@ public class AutorunManager {
     /**
      * Saves the events into a file and creates a backup of the previous save
      */
-    public static void save() {
-        if (root.child(save).exists()) {
-            root.child(save).moveTo(root.child(save + ".backup"));
+    public void save() {
+        if (root.child(nameSave).exists()) {
+            root.child(nameSave).moveTo(root.child(nameSave + ".backup"));
         }
 
-        var writes = root.child(save).writes();
+        var writes = root.child(nameSave).writes();
         events.each(entry -> {
             writes.b(startScript);
             writes.str(entry.event.getName());
@@ -134,22 +117,16 @@ public class AutorunManager {
         writes.close();
     }
 
-    public static <T> AutorunEntry<T> add(Class<T> event, final String script) {
+    public <T> AutorunEntry<T> add(Class<T> event, final String script) {
         var entry = new AutorunEntry<>(event, script);
 
         Cons<T> cons = it -> {
             if (entry.enabled) {
                 //add temporary variable that references the event object
                 String variable = "autorun_event_obj" + Mathf.random(999999);
-                Vars.mods.getScripts().scope.put(variable, Vars.mods.getScripts().scope, it);
+                String res = runner.get(script, variable, it);
 
-                //replace all instances of _autorun_event to the event object
-                String exec = Vars.mods.getScripts().runConsole(script.replaceAll("_autorun_event", variable));
-
-                //delete object
-                Vars.mods.getScripts().scope.delete(variable);
-
-                if(ConsoleSettings.logAutorunOutput()) Log.info(exec);
+                if(ConsoleSettings.logAutorunOutput()) Log.info(res);
             }
         };
 
@@ -160,11 +137,11 @@ public class AutorunManager {
         return entry;
     }
 
-    public static void remove(String script) {
+    public void remove(String script) {
         remove(events.find(e -> e.script.equals(script)));
     }
 
-    public static <T> void remove(AutorunEntry<T> entry) {
+    public <T> void remove(AutorunEntry<T> entry) {
         Events.remove(entry.event, entry.cons);
         events.remove(entry);
     }

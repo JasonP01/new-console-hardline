@@ -17,7 +17,9 @@ public class ConsoleSettings {
             root.sliderPref("newconsole.font-size", 15, 8, 48, value -> value + " pt.");
 
             root.sliderPref("newconsole.tab-size", 4, 2, 8, value -> {
-                ConsoleVars.console.area.setTabSize(value);
+                ConsoleVars.consoles.each(cons -> {
+                    cons.area.setTabSize(value);
+                });
                 return value + "x";
             });
 

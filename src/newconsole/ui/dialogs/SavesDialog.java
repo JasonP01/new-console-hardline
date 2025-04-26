@@ -28,26 +28,28 @@ public class SavesDialog extends BaseDialog {
 
         cont.table(save -> {
             save.button("@newconsole.save", Styles.defaultt, () -> {
+                Console console = ConsoleVars.getCurrentConsole();
+
                 String name = saveName.getText();
                 if (name.replaceAll("\\s", "").isEmpty()) {
                     Vars.ui.showInfo("@newconsole.empty-name");
                     return;
                 }
 
-                String script = ConsoleVars.console.area.getText();
+                String script = console.area.getText();
                 if (script.replaceAll("\\s", "").isEmpty()) {
                     Vars.ui.showInfo("@newconsole.empty-script");
                     return;
                 }
 
-                if (ScriptsManager.scripts.containsKey(name)) {
+                if (console.scripts.scripts.containsKey(name)) {
                     //Overwrite, ask the player to confirm
                     Vars.ui.showConfirm("@newconsole.overwrite-confirm", () -> {
-                        ScriptsManager.saveScript(name, script);
+                        console.scripts.saveScript(name, script);
                         rebuild();
                     });
                 } else {
-                    ScriptsManager.saveScript(name, script);
+                    console.scripts.saveScript(name, script);
                     rebuild();
                 }
             }).width(90).get();
@@ -64,10 +66,11 @@ public class SavesDialog extends BaseDialog {
 
     public void rebuild() {
         scriptsTable.clearChildren();
+        Console console = ConsoleVars.getCurrentConsole();
 
         // copy to a seq, then sort by name - fuck java.
-        Seq<Pair<String, String>> seq = new Seq<>(ScriptsManager.scripts.size);
-        ScriptsManager.eachScript((name, script) -> seq.add(new Pair<>(name, script)));
+        Seq<Pair<String, String>> seq = new Seq<>(console.scripts.scripts.size);
+        console.scripts.eachScript((name, script) -> seq.add(new Pair<>(name, script)));
 
         seq.sort(new EntryComparator());
 
@@ -88,17 +91,19 @@ public class SavesDialog extends BaseDialog {
             entry.add(new CodeSpinner(script)).growX();
 
             entry.table(actions -> {
+                Console console = ConsoleVars.getCurrentConsole();
+
                 actions.center().right().defaults().center().size(50);
 
-                actions.button(CStyles.playIcon, Styles.defaulti, () -> ConsoleVars.console.runConsole(script));
+                actions.button(CStyles.playIcon, Styles.defaulti, () -> ConsoleVars.getCurrentConsole().runConsole(script));
 
                 actions.button(CStyles.editIcon, Styles.defaulti, () -> {
-                    ConsoleVars.console.setCode(script);
+                    ConsoleVars.getCurrentConsole().setCode(script);
                     hide();
                 });
 
                 actions.button(CStyles.deleteIcon, Styles.defaulti, () -> Vars.ui.showConfirm("@newconsole.delete-confirm", () -> {
-                    ScriptsManager.deleteScript(name);
+                    console.scripts.deleteScript(name);
                     scriptsTable.removeChild(entry);
                 }));
             });

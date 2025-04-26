@@ -19,11 +19,10 @@ import newconsole.ui.*;
  * @author Mnemotechnician
  */
 public class AutorunDialog extends BaseDialog {
-
+    
     public Class<?> lastEvent = EventType.ClientLoadEvent.class;
-
+    
     public Table list;
-    //public Spinner eventsSpinner;
 
     public AutorunDialog() {
         super("@newconsole.autorun-header");
@@ -55,20 +54,6 @@ public class AutorunDialog extends BaseDialog {
                         panel.label(() -> lastEvent.getSimpleName()).growX().get().setColor(Pal.accent);
                         panel.row();
 
-					/*
-					TODO broken, what the fuck happened???
-
-					eventsSpinner = new Spinner("@newconsole.select-event", false, events -> {
-						AutorunManager.allEvents.each(event -> {
-                            events.button(event.getSimpleName(), Styles.defaultt, () -> {
-                                lastEvent = event;
-
-                                eventsSpinner.hide(false);
-                            }).growX().row();
-						});
-					});
-					*/
-
                         BetterPane pane = new BetterPane(events -> {
                             AutorunManager.allEvents.each(event -> {
                                 events.button(event.getSimpleName(), Styles.defaultt, () -> {
@@ -80,11 +65,11 @@ public class AutorunDialog extends BaseDialog {
                         panel.add(pane).grow().marginBottom(10f).row();
 
                         panel.button("@newconsole.save", Styles.defaultt, () -> {
-                            String code = ConsoleVars.console.area.getText();
+                            String code = ConsoleVars.consoles.get(ConsoleVars.selectConsole).area.getText();
 
                             if (!code.isEmpty()) {
-                                AutorunManager.add(lastEvent, code);
-                                AutorunManager.save();
+                                ConsoleVars.getCurrentConsole().autorun.add(lastEvent, code);
+                                ConsoleVars.getCurrentConsole().autorun.save();
                                 rebuild();
                             } else {
                                 Vars.ui.showInfo("@newconsole.empty-script");
@@ -106,7 +91,7 @@ public class AutorunDialog extends BaseDialog {
 
     public void rebuild() {
         list.clearChildren();
-        for (var entry : AutorunManager.events) addEntry(entry);
+        for (var entry : ConsoleVars.getCurrentConsole().autorun.events) addEntry(entry);
     }
 
     public void addEntry(AutorunManager.AutorunEntry<?> entry) {
@@ -132,13 +117,13 @@ public class AutorunDialog extends BaseDialog {
                 });
 
                 actions.button(CStyles.editIcon, Styles.defaulti, () -> {
-                    ConsoleVars.console.setCode(entry.script);
+                    ConsoleVars.consoles.get(ConsoleVars.selectConsole).setCode(entry.script);
                     hide();
                 });
 
                 actions.button(CStyles.deleteIcon, Styles.defaulti, () -> Vars.ui.showConfirm("@newconsole.delete-confirm", () -> {
-                    AutorunManager.remove(entry);
-                    AutorunManager.save();
+                    ConsoleVars.getCurrentConsole().autorun.remove(entry);
+                    ConsoleVars.getCurrentConsole().autorun.save();
                     rebuild();
                 }));
             }).padLeft(20f);

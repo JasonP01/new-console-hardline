@@ -3,6 +3,7 @@ package newconsole;
 import arc.*;
 import arc.math.geom.*;
 import arc.scene.event.*;
+import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
 import arc.util.*;
 import com.github.mnemotechnician.autoupdater.*;
@@ -12,7 +13,6 @@ import mindustry.gen.*;
 import mindustry.mod.*;
 import mindustry.ui.*;
 import newconsole.game.*;
-import newconsole.io.*;
 import newconsole.js.*;
 import newconsole.ui.*;
 import newconsole.ui.dialogs.*;
@@ -30,6 +30,8 @@ public class NewConsoleMod extends Mod {
 
             CStyles.loadSync();
             initConsole();
+
+            Events.fire(new NewConsoleInitEvent());
         });
 
         Events.on(EventType.ClientLoadEvent.class, a -> checkUpdates());
@@ -62,7 +64,16 @@ public class NewConsoleMod extends Mod {
         ConsoleVars.group.touchable = Touchable.childrenOnly;
         ConsoleVars.group.visible(() -> ConsoleVars.consoleEnabled);
         Core.scene.add(ConsoleVars.group);
-        ConsoleVars.console = new Console();
+
+        ConsoleVars.consoles.add(new Console(new JsCodeArea("", CStyles.monoArea), "JS", code -> Vars.mods.getScripts().runConsole(code), (script, variable, eventObj) -> {
+            Vars.mods.getScripts().scope.put(variable, Vars.mods.getScripts().scope, eventObj);
+
+            String res = Vars.mods.getScripts().runConsole(script.replaceAll("_autorun_event", variable));
+
+            Vars.mods.getScripts().scope.delete(variable);
+
+            return res;
+        }));
 
         ConsoleVars.saves = new SavesDialog();
         ConsoleVars.copypaste = new CopypasteDialog();
@@ -71,8 +82,26 @@ public class NewConsoleMod extends Mod {
 
         ConsoleVars.floatingWidget = new FloatingWidget();
 
-        ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, ConsoleVars.console::show)
-                .uniformX().uniformY().fill();
+        ImageButton b = ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, () -> {
+            ConsoleVars.getCurrentConsole().show();
+        }).uniformX().uniformY().fill().get();
+
+        ConsoleVars.floatingWidget.row();
+
+        ConsoleVars.floatingWidget.button(Icon.left, Styles.defaulti, () -> {
+            if(ConsoleVars.selectConsole > 0){
+                ConsoleVars.selectConsole--;
+                b.getImage().setDrawable(ConsoleVars.getCurrentConsole().buttonIcon);
+            }
+        }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);
+
+        ConsoleVars.floatingWidget.button(Icon.right, Styles.defaulti, () -> {
+            int offs = ConsoleVars.selectConsole - 1;
+            if(offs < ConsoleVars.consoles.size - 1){
+                ConsoleVars.selectConsole++;
+                b.getImage().setDrawable(ConsoleVars.getCurrentConsole().buttonIcon);
+            }
+        }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);;
 
         ConsoleVars.group.addChild(ConsoleVars.floatingWidget);
         Time.run(10, () -> {
@@ -97,9 +126,9 @@ public class NewConsoleMod extends Mod {
             ConsoleSettings.setLastButtonPosition(newPosition);
         }, 2f, 2f);
 
-        ScriptsManager.init();
-        AutorunManager.init();
         ConsoleSettings.init();
         executeStartup();
     }
+
+    public static class NewConsoleInitEvent{}
 }

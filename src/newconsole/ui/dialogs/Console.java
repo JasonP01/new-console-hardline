@@ -1,16 +1,22 @@
 package newconsole.ui.dialogs;
 
+import arc.*;
 import arc.files.*;
 import arc.func.*;
 import arc.math.*;
+import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.struct.*;
 import arc.util.*;
 import mindustry.*;
+import mindustry.gen.*;
 import mindustry.ui.*;
 import mindustry.ui.dialogs.*;
 import newconsole.*;
+import newconsole.io.*;
 import newconsole.ui.*;
+
+import java.util.*;
 
 import static arc.util.Log.*;
 
@@ -25,27 +31,49 @@ public class Console extends BaseDialog {
      */
     public static final char dontResend = '\u0019';
     public static final String dontResendStr = String.valueOf(dontResend);
-    public static Fi historySaveFile;
+    public Fi historySaveFile;
 
     /**
-     * Input & output log
+     * Input & output log.
      */
-    public static final StringBuilder logBuffer = new StringBuilder(5000);
+    public final StringBuilder logBuffer = new StringBuilder(5000);
+
     /**
      * Input history, used to allow the user to redo/undo last inputs. #0 is the current input
      */
-    public static final Seq<String> history = Seq.with("", "");
-    protected static boolean needsInit = true;
+    public final Seq<String> history = Seq.with("", "");
+    protected boolean needsInit = true;
+
     /**
      * Current command. -1 means that the input is empty
      */
     public int historyIndex = -1;
-    public JsCodeArea area;
-    public Label logLabel;
-    public BetterPane leftPane, rightPane;
 
-    public Console() {
-        super("@newconsole.console-header");
+    /** The code area used for this console. */
+    public final CodeArea area;
+    public final String consoleIdentifier;
+    public final ScriptsManager scripts;
+    public final AutorunManager autorun;
+
+    public Drawable buttonIcon = Icon.terminal;
+
+    public Func<String, String> runner;
+
+    private Label logLabel;
+    private BetterPane leftPane, rightPane;
+
+
+    public Console(CodeArea area, String consoleIdentifier, Func<String, String> runner, Func3<String, String, Object, String> autorunRunner) {
+        super(Core.bundle.format("newconsole.console-header", consoleIdentifier));
+        this.area = area;
+        this.consoleIdentifier = consoleIdentifier;
+        this.runner = runner;
+
+        this.scripts = new ScriptsManager(consoleIdentifier.toLowerCase(Locale.ROOT));
+        this.autorun = new AutorunManager(consoleIdentifier.toLowerCase(Locale.ROOT)){{
+            runner = autorunRunner;
+        }};
+
         closeOnBack();
 
         cont.center().margin(0).fill();
@@ -101,7 +129,7 @@ public class Console extends BaseDialog {
                     }).growX().row();
 
                     script.add(new BetterPane(input -> {
-                        input.add(area = new JsCodeArea("", CStyles.monoArea)).bottom().left().grow().get();
+                        input.add(area).bottom().left().grow().get();
 
                         area.changed(text -> {
                             history.set(0, text);
@@ -110,7 +138,7 @@ public class Console extends BaseDialog {
 
                         area.setFocusTraversal(false);
                         area.removeInputDialog();
-                        area.setMessageText("@newconsole.input-script");
+                        area.setMessageText(Core.bundle.format("newconsole.input-script", consoleIdentifier));
                         // area.setTabSize(NCSetting.tabSize());
                     })).grow().with(it -> {
                         // it.setForceScroll(false, true);
@@ -126,12 +154,12 @@ public class Console extends BaseDialog {
         init();
     }
 
-    public static void init() {
+    public void init() {
         if (!needsInit) return;
         needsInit = false;
 
-        historySaveFile = Vars.dataDirectory.child("saves").child("newconsole.history");
-        // celete the save if it's a directory
+        historySaveFile = Vars.dataDirectory.child("saves").child(Strings.format("newconsole-@.history", consoleIdentifier.toLowerCase(Locale.ROOT)));
+        // delete the save if it's a directory
         if (historySaveFile.exists() && historySaveFile.isDirectory()) historySaveFile.deleteDirectory();
         var backup = historySaveFile.sibling(historySaveFile.name() + ".backup");
         if (backup.exists() && backup.isDirectory()) backup.deleteDirectory();
@@ -160,17 +188,13 @@ public class Console extends BaseDialog {
     /**
      * Tries to read the last log. Overrides the buffer on success.
      */
-    public static void backread() {
+    public void backread() {
         try {
             var log = Vars.dataDirectory.child("last_log.txt");
             if (log.exists()) {
                 logBuffer.setLength(0);
                 logBuffer.append(log.readString());
-                Time.run(4, () -> {
-                    if (ConsoleVars.console != null) {
-                        ConsoleVars.console.scrollDown();
-                    }
-                });
+                Time.run(4, this::scrollDown);
             } else {
                 warn("last log file doesn't exist");
             }
@@ -179,7 +203,7 @@ public class Console extends BaseDialog {
         }
     }
 
-    public static void addHistory(String command) {
+    public void addHistory(String command) {
         if (history.size < 1) {
             history.add("");
         }
@@ -197,7 +221,7 @@ public class Console extends BaseDialog {
     /**
      * Writes the script history to historySaveFile.
      */
-    public static void writeHistory() {
+    public void writeHistory() {
         var backup = historySaveFile.sibling(historySaveFile.name() + ".backup");
         if (historySaveFile.exists()) {
             historySaveFile.copyTo(backup);
@@ -219,7 +243,7 @@ public class Console extends BaseDialog {
     /**
      * Reads the script history from historySaveFile and overrides the current history with it.
      */
-    public static void readHistory() {
+    public void readHistory() {
         var backup = historySaveFile.sibling(historySaveFile.name() + ".backup");
         Func<Fi, Boolean> readFrom = (file) -> {
             try (var reads = file.reads()) {
@@ -269,8 +293,8 @@ public class Console extends BaseDialog {
 
     public void runConsole(String code) {
         //messages starting with \u0019 aren't re-sent
-        addLog("[blue]JS $ [grey]" + Strings.stripColors(code) + "\n");
-        String log = Vars.mods.getScripts().runConsole(code);
+        addLog("[blue]" + consoleIdentifier + " $[] [grey]" + Strings.stripColors(code) + "\n");
+        String log = runner.get(code);
         addLog("[yellow]> [lightgrey]" + Strings.stripColors(log) + "\n");
     }
 

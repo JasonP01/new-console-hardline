@@ -85,7 +85,7 @@ public class FileBrowser extends Dialog {
                     name = name + ".js"; //no extension - set to .js
                 }
 
-                String script = ConsoleVars.console.area.getText();
+                String script = ConsoleVars.getCurrentConsole().area.getText();
                 var file = currentDirectory.child(name);
                 if (!file.exists()) {
                     file.writeString(script, false);
@@ -232,9 +232,9 @@ public class FileBrowser extends Dialog {
                     openDirectory(it);
                 } else {
                     if (readableExtensions.contains(ext) || codeExtensions.contains(ext)) {
-                        if (ConsoleVars.console != null) {
+                        if (ConsoleVars.getCurrentConsole() != null) {
                             Vars.ui.showConfirm("@newconsole.open-readable", () -> {
-                                ConsoleVars.console.setCode(it.readString());
+                                ConsoleVars.getCurrentConsole().setCode(it.readString());
                                 hide();
                             });
                         }
@@ -242,7 +242,7 @@ public class FileBrowser extends Dialog {
                         imageDialog.showFor(it);
                     } else {
                         Vars.ui.showConfirm("@newconsole.unknown-format", () -> {
-                            ConsoleVars.console.setCode(it.readString());
+                            ConsoleVars.getCurrentConsole().setCode(it.readString());
                             hide();
                         });
                     }

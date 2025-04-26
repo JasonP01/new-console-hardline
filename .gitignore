@@ -150,7 +150,10 @@ gradle-app.setting
 /ios/build/
 /ios-moe/build/
 
-## OS Specific
+## OS Specific\
 .DS_Store
 Thumbs.db
 android/libs/
+
+## Extras
+/nch-kotlin-eval/build/
