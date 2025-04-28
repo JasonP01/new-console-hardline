@@ -22,7 +22,7 @@ public class NewConsoleMod extends Mod {
     public NewConsoleMod() {
         Vars.loadLogger();
 
-        Events.on(EventType.ClientLoadEvent.class, event -> {
+        Events.run(EventType.ClientLoadEvent.class, () -> {
             NCJSLink.importPackage(
                     "newconsole", "newconsole.game", "newconsole.io",
                     "newconsole.js", "newconsole.ui"
@@ -32,9 +32,14 @@ public class NewConsoleMod extends Mod {
             initConsole();
 
             Events.fire(new NewConsoleInitEvent());
+
+            ConsoleVars.consoles.each(cons -> {
+                cons.scripts.load();
+                cons.autorun.load();
+            });
         });
 
-        Events.on(EventType.ClientLoadEvent.class, a -> checkUpdates());
+        Events.run(EventType.ClientLoadEvent.class, this::checkUpdates);
     }
 
     public static void executeStartup() {
@@ -82,28 +87,29 @@ public class NewConsoleMod extends Mod {
 
         ConsoleVars.floatingWidget = new FloatingWidget();
 
-        ImageButton b = ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, () -> {
-            ConsoleVars.getCurrentConsole().show();
-        }).uniformX().uniformY().fill().get();
+        ImageButton b = ConsoleVars.floatingWidget.button(Icon.terminal, Styles.defaulti, () ->
+                ConsoleVars.getCurrentConsole().show()
+        ).uniformX().uniformY().fill().get();
 
         ConsoleVars.floatingWidget.row();
 
         ConsoleVars.floatingWidget.button(Icon.left, Styles.defaulti, () -> {
             if(ConsoleVars.selectConsole > 0){
                 ConsoleVars.selectConsole--;
-                b.getImage().setDrawable(ConsoleVars.getCurrentConsole().buttonIcon);
+                b.replaceImage(new Image(ConsoleVars.getCurrentConsole().buttonIcon));
             }
         }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);
 
         ConsoleVars.floatingWidget.button(Icon.right, Styles.defaulti, () -> {
             int offs = ConsoleVars.selectConsole - 1;
-            if(offs < ConsoleVars.consoles.size - 1){
-                ConsoleVars.selectConsole++;
-                b.getImage().setDrawable(ConsoleVars.getCurrentConsole().buttonIcon);
-            }
-        }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);;
+            if(offs > ConsoleVars.consoles.size - 1) return;
+
+            ConsoleVars.selectConsole++;
+            b.replaceImage(new Image(ConsoleVars.getCurrentConsole().buttonIcon));
+        }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);
 
         ConsoleVars.group.addChild(ConsoleVars.floatingWidget);
+
         Time.run(10, () -> {
             // try to restore the position of the button
             var oldPosition = ConsoleSettings.getLastButtonPosition();
@@ -113,6 +119,7 @@ public class NewConsoleMod extends Mod {
                     oldPosition.y != -1 ? oldPosition.y : ConsoleVars.group.getHeight() / 1.5f
             );
         });
+
         var lastSavedPosition = new Vec2(-1, -1);
         Timer.schedule(() -> {
             // Save the position of the floating button, if necessary

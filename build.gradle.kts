@@ -161,19 +161,20 @@ allprojects {
 
                 val outputDir = dexCacheRoot.resolve(hash(dependency.toByteArray()).replace("==", "")).also { it.mkdir() }
                 exec {
-                    errorOutput = object : OutputStream(){
-                        override fun write(b: Int) {
-
-                        }
-                    }
-                    commandLine(
-                            d8,
-                            "--intermediate",
-                            "--classpath", "${platformRoot.absolutePath}/android.jar",
-                            "--min-api", "14",
-                            "--output", outputDir.absolutePath,
-                            dependency
+                    errorOutput = System.err
+                    val final = arrayOf(
+                        d8,
+                        "--release",
+                        "--lib", "${platformRoot.absolutePath}/android.jar",
+                        "--min-api", "14",
+                        "--output", outputDir.absolutePath,
+                        dependency
                     )
+                    final.forEach {
+                        print("$it ")
+                        if(final.last() == it) println()
+                    }
+                    commandLine(final)
                 }
                 println()
                 dexCacheHashes[dependency] = hash
@@ -370,10 +371,12 @@ subprojects {
 
         from(*configurations.runtimeClasspath.get().files.map { if (it.isDirectory) it else zipTree(it) }.toTypedArray())
 
-        from("$rootDir/${project.name}") {
+        from(projectDir) {
             include("mod.hjson")
             include("icon.png")
         }
+
+        from("$projectDir/assets/") { include("**") }
     }
 }
 
@@ -383,12 +386,12 @@ tasks.jar {
 
     from(*configurations.runtimeClasspath.get().files.map { if (it.isDirectory) it else zipTree(it) }.toTypedArray())
 
-    from(rootDir) {
+    from(projectDir) {
         include("mod.hjson")
         include("icon.png")
     }
 
-    from("$rootDir/assets/") { include("**") }
+    from("$projectDir/assets/") { include("**") }
 }
 
 task<Copy>("buildAll") {

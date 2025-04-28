@@ -1,23 +1,23 @@
 package newconsole
 
-import arc.Events
-import arc.func.Func3
+import arc.*
 import kotlinx.coroutines.*
-import mindustry.gen.Icon
-import mindustry.mod.Mod
-import newconsole.NewConsoleMod.NewConsoleInitEvent
-import newconsole.console.KtsCodeArea
-import newconsole.runtime.KtsEval
-import newconsole.ui.CStyles
-import newconsole.ui.dialogs.Console
+import mindustry.gen.*
+import mindustry.mod.*
+import newconsole.NewConsoleMod.*
+import newconsole.console.*
+import newconsole.js.NCJSLink
+import newconsole.runtime.*
+import newconsole.ui.*
+import newconsole.ui.dialogs.*
+import kotlin.collections.set
 import kotlin.script.experimental.api.*
-import kotlin.script.experimental.host.toScriptSource
-import kotlin.script.experimental.util.PropertiesCollection
+import kotlin.script.experimental.host.*
+import kotlin.script.experimental.util.*
 
 class NewConsoleKts: Mod() {
     init {
         Events.run(NewConsoleInitEvent::class.java){
-            //TODO works fine but WHAT THE FUCK DO YOU MEAN YOU CANT FIND THE STDLIB IT IS RIGHT FUCKING THERE
             ConsoleVars.consoles.add(Console(KtsCodeArea("", CStyles.monoArea), "KTS", {code ->
                 val result = runScript(script = code)
 
@@ -47,6 +47,8 @@ class NewConsoleKts: Mod() {
             }).apply {
                 buttonIcon = Icon.android
             })
+
+            NCJSLink.importPackage("newconsole.runtime", "newconsole.console")
         }
     }
 
@@ -56,7 +58,7 @@ class NewConsoleKts: Mod() {
                 val compileConfig = ScriptCompilationConfiguration(KtsEval.scriptCompileConfig) {
                     confCompile?.invoke(this)
                 }
-                val evalConfig = ScriptEvaluationConfiguration {
+                val evalConfig = ScriptEvaluationConfiguration(KtsEval.scriptEvalConfig) {
                     compilationConfiguration(compileConfig)
                     confEval?.invoke(this)
                 }

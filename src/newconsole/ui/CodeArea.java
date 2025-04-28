@@ -7,7 +7,6 @@ import arc.scene.event.*;
 import arc.scene.style.*;
 import arc.scene.ui.*;
 import arc.struct.*;
-import arc.util.*;
 import mindustry.graphics.*;
 import newconsole.game.*;
 
@@ -17,7 +16,9 @@ import static newconsole.ui.CodeArea.SymbolKind.*;
 
 public class CodeArea extends TextArea{
 
-    public boolean syntaxHighlighting = true;
+    public boolean supportsSyntaxHighlighting = true,
+    supportsIndentationAssistance = true,
+    supportsCharacterPairs = true;
 
     protected FontCache cache;
     protected String[] lines;
@@ -108,7 +109,7 @@ public class CodeArea extends TextArea{
     }
 
     public void updateSyntaxHighlighting() {
-        if (syntaxHighlighting && ConsoleSettings.syntaxHighlighting()) try {
+        if (supportsSyntaxHighlighting && ConsoleSettings.syntaxHighlighting()) try {
             var symbolb = new StringBuilder();
             var pos = 0;
             var posOffset = 0;
@@ -463,8 +464,8 @@ public class CodeArea extends TextArea{
     class AssistingInputListener extends TextAreaListener {
         @Override
         public boolean keyTyped(InputEvent event, char character) {
-            var indentAssistance = ConsoleSettings.indentationAssistance();
-            var pairedChars = ConsoleSettings.characterPairs();
+            var indentAssistance = supportsIndentationAssistance && ConsoleSettings.indentationAssistance();
+            var pairedChars = supportsCharacterPairs && ConsoleSettings.characterPairs();
 
             if (character == '\t') {
                 insertAtCursor(tab);

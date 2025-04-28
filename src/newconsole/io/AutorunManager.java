@@ -14,16 +14,10 @@ import newconsole.game.*;
  * @author Mnemotechnician
  */
 @SuppressWarnings("unused")
-public class AutorunManager {
-
-    //public static final String save = "newconsole.autorun";
-    public static final byte startScript = 3, endScript = 4, splitter = 17, eof = 127;
-
-    public static Fi root = Vars.dataDirectory.child("saves");
-
+public class AutorunManager implements BaseManager{
     public static final Seq<Class<?>> allEvents = new Seq<>();
 
-    public final String name, nameSave;
+    public final String name, nameSave, backupSave;
     public final Seq<AutorunEntry<?>> events = new Seq<>();
 
     //???
@@ -32,6 +26,7 @@ public class AutorunManager {
     public AutorunManager(String name){
         this.name = name;
         this.nameSave = Strings.format("newconsole-autorun-@.save", name);
+        this.backupSave = Strings.format("newconsole-autorun-@.save.backup", name);
     }
 
     static {
@@ -39,21 +34,27 @@ public class AutorunManager {
     }
 
     /**
-     * Loads events from the provided file. Returns whether the load was successful.
+     * Loads events from the save file for this manager. Returns whether the load was successful.
      */
-    public boolean loadSave(Fi file) {
-        if (file == null || !file.exists()) return false;
-        if (root == null) throw new IllegalStateException("AutorunManager hasn't been initialized yet");
+    public void load() {
+        Fi file = ManagerObjects.root.child(nameSave).exists() ? ManagerObjects.root.child(nameSave) : ManagerObjects.root.child(backupSave);
+        
+        if(!file.exists()){
+            Log.warn("Autorun script save file for @ not found or inaccessible.", name);
+            return;
+        }
+
+        int count = 0;
 
         try (var reads = file.reads()) {
             int b;
 
             outer:
-            while ((b = reads.b()) != eof) {
+            while ((b = reads.b()) != ManagerObjects.eof) {
                 //find sos
-                if (b != startScript) {
-                    if (b == splitter || b == endScript) {
-                        Log.warn("unexpected character " + b + ", ignoring.");
+                if (b != ManagerObjects.startScript) {
+                    if (b == ManagerObjects.splitter || b == ManagerObjects.endScript) {
+                        Log.warn("Unexpected character " + b + ", ignoring.");
                     }
                     continue;
                 }
@@ -68,13 +69,13 @@ public class AutorunManager {
                     continue;
                 }
 
-                //find splitter
-                while ((b = reads.b()) != splitter) {
-                    if (b == startScript || b == endScript) {
+                //find ManagerObjects.splitter
+                while ((b = reads.b()) != ManagerObjects.splitter) {
+                    if (b == ManagerObjects.startScript || b == ManagerObjects.endScript) {
                         Log.warn("unexpected character " + b + ", ignoring this entry.");
                         continue;
                     }
-                    if (b == eof) break outer;
+                    if (b == ManagerObjects.eof) break outer;
                 }
 
                 //read script
@@ -83,37 +84,38 @@ public class AutorunManager {
                 //construct the entry
                 var entry = add(clazz, script);
                 entry.enabled = false; //you wouldn't want mindustry to fall into a bootloop, would you?
+                count++;
 
                 //find eos, just in case
-                while ((b = reads.b()) != endScript) {
-                    if (b == eof) break outer;
+                while ((b = reads.b()) != ManagerObjects.endScript) {
+                    if (b == ManagerObjects.eof) break outer;
                 }
             }
+
+            Log.info("NewConsole (@): Loaded @ autorun script(s).", name, count);
         } catch (Exception e) {
             Log.err("Couldn't read events file (" + file.absolutePath() + "). illegal modification?", e);
-            return false;
         }
 
-        return true;
     }
 
     /**
      * Saves the events into a file and creates a backup of the previous save
      */
     public void save() {
-        if (root.child(nameSave).exists()) {
-            root.child(nameSave).moveTo(root.child(nameSave + ".backup"));
+        if (ManagerObjects.root.child(nameSave).exists()) {
+            ManagerObjects.root.child(nameSave).moveTo(ManagerObjects.root.child(backupSave));
         }
 
-        var writes = root.child(nameSave).writes();
+        var writes = ManagerObjects.root.child(nameSave).writes();
         events.each(entry -> {
-            writes.b(startScript);
+            writes.b(ManagerObjects.startScript);
             writes.str(entry.event.getName());
-            writes.b(splitter);
+            writes.b(ManagerObjects.splitter);
             writes.str(entry.script);
-            writes.b(endScript);
+            writes.b(ManagerObjects.endScript);
         });
-        writes.b(eof);
+        writes.b(ManagerObjects.eof);
         writes.close();
     }
 
