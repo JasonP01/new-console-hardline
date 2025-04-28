@@ -1,0 +1,24 @@
+           !!!!!!!!!!!!!!!!!!!!!!!!
+           !!!!! EXPERIMENTAL !!!!!
+           !!!!!!!!!!!!!!!!!!!!!!!!
+
+   This extension mod is currently in testing.
+
+   Everything works, but at the moment it
+   refuses to compile for Android, which is
+   still yet to be tested for support.
+
+   The compile error is related to the
+   Kotlin compiler embeddable library,
+   which d8 seems to have issues with.
+
+   Further local device configuration will
+   be done.
+
+   To build:
+
+   ./gradlew jar
+
+   This builds the current NewConsole source
+   code before actually building the extension
+   mod itself.

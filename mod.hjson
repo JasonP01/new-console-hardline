@@ -1,4 +1,4 @@
-#!VERSION 2.1
+#!VERSION 2.2
 #!REPO "SMOLKEYS/new-console-hardline"
 #!BRANCH "master"
 
@@ -21,7 +21,7 @@ In addition to the console, this mod offers:
 See README.md for more info.
 '''
 
-version: 2.1
+version: 2.2
 subtitle: "Adds a superior console UI."
 minGameVersion: 147
 hidden: true

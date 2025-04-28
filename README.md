@@ -1,4 +1,4 @@
-## New Console Hardline
+# New Console Hardline
 A Mindustry mod adding a new console UI, which is superior to that provided by the vanilla game or any other mod.
 
 This repository is an active fork of the old repository, as the original developer (Mnemotechnician) has effectively left the Mindustry modding scene. It is detached from the root repository so that the mod scraper can list this fork in the mod browser.
@@ -33,7 +33,7 @@ Why prefer NewConsole over other console mods or the built-in one? Well, there a
   meaning that it will never leave you worrying that you will lose "that one useful script".
 * NC has many other features, most of which are listed below.
 
-## Main features
+### Main features
 * A new console ui, consisting of 3 main elements:
     * A scrollable log output on the left, which also includes the scripts you've run and their outputs, and which can be cleared.
     * A code editor on the right, in which you're supposed to enter your code.
@@ -68,6 +68,11 @@ Whenever you execute a script or navigate in the history, your current script is
 Using the "prev" and "next" buttons, you can view older and newer entries of the history.
 If you press "next" while already being at the newest history entry, your current input is cleared. 
 You can always press "prev" to return to whatever you've been writing.
+
+# API (WIP)
+As of NewConsole 2.2, a bunch of changes have now been applied to the source code, allowing for the development of **consoles for different scripting APIs**.
+
+**This is currently a work in progress and will see more development in the next coming days.**
 
 # ~~Rewrite ahead~~
 <strike>NewConsole 1.8 will be the last version of NewConsole written in java.

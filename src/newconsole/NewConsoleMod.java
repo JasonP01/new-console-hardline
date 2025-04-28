@@ -101,8 +101,7 @@ public class NewConsoleMod extends Mod {
         }).uniformX().uniformY().fill().visible(() -> ConsoleVars.consoles.size > 1);
 
         ConsoleVars.floatingWidget.button(Icon.right, Styles.defaulti, () -> {
-            int offs = ConsoleVars.selectConsole - 1;
-            if(offs > ConsoleVars.consoles.size - 1) return;
+            if(ConsoleVars.selectConsole == ConsoleVars.consoles.size - 1) return;
 
             ConsoleVars.selectConsole++;
             b.replaceImage(new Image(ConsoleVars.getCurrentConsole().buttonIcon));

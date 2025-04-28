@@ -1,5 +1,4 @@
 
-import java.io.OutputStream
 import java.security.MessageDigest
 import java.util.*
 
@@ -170,11 +169,15 @@ allprojects {
                         "--output", outputDir.absolutePath,
                         dependency
                     )
-                    final.forEach {
+                    print("d8 exec command: \"")
+                    final.forEach distinct@{
+                        if(final.last() == it){
+                            println("$it\"")
+                            return@distinct
+                        }
                         print("$it ")
-                        if(final.last() == it) println()
                     }
-                    commandLine(final)
+                    commandLine(*final)
                 }
                 println()
                 dexCacheHashes[dependency] = hash
