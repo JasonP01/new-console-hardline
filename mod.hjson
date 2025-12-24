@@ -21,9 +21,9 @@ In addition to the console, this mod offers:
 See README.md for more info.
 '''
 
-version: 2.2
+version: 2.3
 subtitle: "Adds a superior console UI."
-minGameVersion: 147
+minGameVersion: 154
 hidden: true
 java: true
 main: "newconsole.NewConsoleMod"

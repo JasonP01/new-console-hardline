@@ -5,14 +5,18 @@ This repository is an active fork of the old repository, as the original develop
 
 [Original Repository](https://github.com/Mnemotechnician/new-console)
 
+## V8 (b154) Sound Changes
+With the various renames of `Sounds` fields, starting from NCH-2.3, NewConsole requires Mindustry v154-above to run.
+
+- NCH-2.3 and future versions - v154-above
+    * You *could* technically use NCH-2.0 up to 2.3 on Mindustry versions as far back as v136, as no code changes were made at all, but Mindustry does not have a special toggle for Java mods that indicates cross-compatibility between all those versions.
+- NCH-2.0 up to NCH-2.2 - v147-v153
+- NC-1.4.1 up to NC-1.9 - v136-146
+- NC-1.4 below - v135.2-below
+
 ## V8
 Starting from NCH-2.0, NewConsole requires Mindustry v147-above to run.
 If you still intend on using older versions of Mindustry, visit the [original repository](https://github.com/Mnemotechnician/new-console) for the older releases.
-
-- NCH-2.0 and future versions - v147-above
-  * You *could* technically use NCH-2.0 on v146-below as no code changes were made at all, but Mindustry does not have a special toggle for Java mods that indicates cross-compatibility between v146 and v147.
-- NC-1.4.1 up to NC-1.9 - v136-146
-- NC-1.4 below - v135.2-below
 
 ## V7
 Starting from NC-1.4.1, NewConsole requires Mindustry v136-above to run.
